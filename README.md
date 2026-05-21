@@ -1,3 +1,5 @@
+<p align="center"><img src="https://anamnesis.armandozaratem.com/logo-transparent.svg" width="400" alt="Anamnesis" /></p>
+
 # Anamnesis — Claude Code Plugin
 
 Anamnesis is a persistent memory server for AI agents that lets Claude save, search, and recover context across sessions and share it among team developers.
