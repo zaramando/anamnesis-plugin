@@ -1,0 +1,14 @@
+{
+  "SessionStart": [
+    {
+      "matchers": ["startup", "clear"],
+      "hooks": [
+        {
+          "type": "command",
+          "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/session-start.sh",
+          "timeout": 5
+        }
+      ]
+    }
+  ]
+}
