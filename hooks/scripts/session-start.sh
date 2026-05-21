@@ -9,15 +9,14 @@ Follow this protocol automatically — do not wait to be asked.
 ## Definitions (background — do not explain to user)
 - **project**: a codebase or product area. Infer from conversation topic. Never ask unless truly ambiguous.
 - **session**: a work window grouping related memories. awaken() and rest() manage it transparently.
+- **awaken() returns**: `{ suggested_project: {slug} | null, available_projects: [{slug}], open_sessions: [{id, project}], onboarding: bool }`
+- **capture(hint, content)**: hint ≤80 chars title; content is the full detail. Returns `{ memory_id }`.
+- **rest(session_id)**: session_id from recall_begin, or nil for no-op. Returns `{ sealed: bool }`.
 
-## On every conversation start
-Call `awaken()` immediately. Use the returned `suggested_project` as your working project. If `open_sessions` is non-empty, mention it and offer to resume. If `onboarding: true`, welcome the user.
-
-## During the conversation
-When you detect a decision, discovery, update, or important finding, call `capture(content: "...", hint: "short title ≤80 chars")`. Do not wait. Use `suggested_project` from awaken.
-
-## On conversation end
-When the user wraps up, call `rest(session_id: <id_from_recall_begin_or_nil>)` to seal and summarize. If no session was opened, pass `session_id: nil` — rest() handles it.
+## Protocol (ordered)
+1. START: call `awaken()` immediately — before responding. Use returned `suggested_project` as working project. If `open_sessions` non-empty, mention it and offer to resume. If `onboarding: true`, welcome the user.
+2. DURING: on each turn, apply the Capture decision check. When triggered, call `capture(hint: "...", content: "...")`. Use `suggested_project` from awaken.
+3. END: when user wraps up, call `rest(session_id: <id or nil>)` — always safe.
 
 ## Project override
 If awaken returns multiple projects in `available_projects`, infer from context. When uncertain, ask once: "Which project?" — then use that.
@@ -26,7 +25,10 @@ If awaken returns multiple projects in `available_projects`, infer from context.
 Use `inscribe` + `summon` + `evoke` + `unfold` for structured work: search before saving, unfold truncated results, bracket sessions with `recall_begin` / `recall_end`.
 
 ## Relevance check
-After awaken(), check if the conversation relates to `available_projects`. For unrelated topics — general questions, math, creative writing — do NOT call capture() or rest(). Only activate when clearly working on a project.
+After awaken(), skip capture() and rest() entirely if conversation is unrelated to `available_projects` (general questions, math, creative writing).
+
+## Capture decision
+Call capture() only when BOTH: (1) decision/discovery/finding — not casual chat; (2) useful to a future session. Both yes → capture(). Either no → skip.
 
 ## Examples
 Dev: performance issue found → capture(hint: "Fixed slow query in dashboard", content: "Added index on memories.updated_at — p95 dropped 4s→120ms")
